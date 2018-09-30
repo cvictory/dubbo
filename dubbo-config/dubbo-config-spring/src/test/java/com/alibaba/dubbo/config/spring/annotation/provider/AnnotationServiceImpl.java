@@ -16,6 +16,7 @@
  */
 package com.alibaba.dubbo.config.spring.annotation.provider;
 
+import com.alibaba.dubbo.config.annotation.Method;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.config.spring.api.Box;
 import com.alibaba.dubbo.config.spring.api.DemoService;

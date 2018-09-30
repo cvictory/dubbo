@@ -17,8 +17,13 @@
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
+import com.alibaba.dubbo.config.annotation.Argument;
+import com.alibaba.dubbo.config.annotation.Method;
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.config.support.Parameter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,6 +78,35 @@ public class MethodConfig extends AbstractMethodConfig {
     private String onthrowMethod;
 
     private List<ArgumentConfig> arguments;
+
+    public MethodConfig(){
+
+    }
+
+    public MethodConfig(Method method) {
+        appendAnnotation(Method.class, method);
+        this.setReturn(method.isReturn());
+        if (method.arguments() != null && method.arguments().length != 0) {
+            List<ArgumentConfig> argumentConfigs = new ArrayList<ArgumentConfig>(method.arguments().length);
+            this.setArguments(argumentConfigs);
+            for (int i = 0; i < method.arguments().length; i++) {
+                ArgumentConfig argumentConfig = new ArgumentConfig(method.arguments()[i]);
+                argumentConfigs.add(argumentConfig);
+            }
+        }
+    }
+
+    public static List<MethodConfig> constructMethodConfig(Method[] methods){
+        if (methods != null && methods.length != 0) {
+            List<MethodConfig> methodConfigs = new ArrayList<MethodConfig>(methods.length);
+            for (int i = 0; i < methods.length; i++) {
+                MethodConfig methodConfig = new MethodConfig(methods[i]);
+                methodConfigs.add(methodConfig);
+            }
+            return methodConfigs;
+        }
+        return Collections.emptyList();
+    }
 
     @Parameter(excluded = true)
     public String getName() {

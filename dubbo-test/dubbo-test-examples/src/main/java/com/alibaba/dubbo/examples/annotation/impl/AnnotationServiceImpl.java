@@ -16,6 +16,7 @@
  */
 package com.alibaba.dubbo.examples.annotation.impl;
 
+import com.alibaba.dubbo.config.annotation.Method;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.examples.annotation.api.AnnotationService;
 
@@ -28,6 +29,11 @@ public class AnnotationServiceImpl implements AnnotationService {
     @Override
     public String sayHello(String name) {
         System.out.println("async provider received: " + name);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "annotation: hello, " + name;
     }
 

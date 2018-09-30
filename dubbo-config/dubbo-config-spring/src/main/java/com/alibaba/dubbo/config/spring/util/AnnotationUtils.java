@@ -40,7 +40,7 @@ import static org.springframework.util.StringUtils.trimAllWhitespace;
 public class AnnotationUtils {
 
     /**
-     * Get {@link Annotation} attributes
+     * Get {@link Annotation} attributes without sub annotation
      *
      * @param annotation
      * @param propertyResolver
@@ -70,6 +70,16 @@ public class AnnotationUtils {
 
             // ignore attribute name
             if (ignoreAttributeNamesSet.contains(attributeName)) {
+                continue;
+            }
+            /**
+             * @since 2.6.5
+             */
+            if (attributeValue.getClass().isAnnotation()){
+                continue;
+            }
+
+            if (attributeValue.getClass().isArray() && attributeValue.getClass().getComponentType().isAnnotation()){
                 continue;
             }
 
