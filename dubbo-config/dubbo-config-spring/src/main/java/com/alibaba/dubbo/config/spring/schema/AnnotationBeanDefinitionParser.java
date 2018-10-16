@@ -20,6 +20,7 @@ import com.alibaba.dubbo.config.spring.AnnotationBean;
 import com.alibaba.dubbo.config.spring.beans.factory.annotation.ReferenceAnnotationBeanPostProcessor;
 import com.alibaba.dubbo.config.spring.beans.factory.annotation.ServiceAnnotationBeanPostProcessor;
 import com.alibaba.dubbo.config.spring.util.BeanRegistrar;
+import com.alibaba.dubbo.registry.support.AbstractRegistry;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -27,6 +28,11 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.w3c.dom.Element;
 
 import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
@@ -64,6 +70,7 @@ public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinition
 
         // Registers ReferenceAnnotationBeanPostProcessor
         registerReferenceAnnotationBeanPostProcessor(parserContext.getRegistry());
+        registerContextRefreshedEventListener(parserContext.getRegistry());
 
     }
 
@@ -85,9 +92,27 @@ public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     }
 
+    private void registerContextRefreshedEventListener(BeanDefinitionRegistry registry) {
+
+        // Register @Reference Annotation Bean Processor
+        BeanRegistrar.registerInfrastructureBean(registry,
+                ReferenceAnnotationBeanPostProcessor.LISTENER_BEAN_NAME, RefreshedContextEventListener.class);
+
+    }
+
     @Override
     protected Class<?> getBeanClass(Element element) {
         return ServiceAnnotationBeanPostProcessor.class;
+    }
+
+    public static class RefreshedContextEventListener implements ApplicationListener<ApplicationEvent>{
+
+        @Override
+        public void onApplicationEvent(ApplicationEvent event) {
+            if(event instanceof ContextRefreshedEvent){
+                AbstractRegistry.SINGLETON.compareAndSet(false, false);
+            }
+        }
     }
 
 }

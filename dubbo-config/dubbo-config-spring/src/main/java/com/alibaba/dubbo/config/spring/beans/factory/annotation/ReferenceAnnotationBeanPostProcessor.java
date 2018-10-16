@@ -18,6 +18,7 @@ package com.alibaba.dubbo.config.spring.beans.factory.annotation;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.spring.ReferenceBean;
+import com.alibaba.dubbo.registry.support.AbstractRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +33,11 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
@@ -71,11 +77,17 @@ public class ReferenceAnnotationBeanPostProcessor extends InstantiationAwareBean
      */
     public static final String BEAN_NAME = "referenceAnnotationBeanPostProcessor";
 
+    public static final String LISTENER_BEAN_NAME = "refreshContextCustListener";
+
     private final Log logger = LogFactory.getLog(getClass());
 
     private ApplicationContext applicationContext;
 
     private ClassLoader classLoader;
+
+    static {
+        AbstractRegistry.SINGLETON.compareAndSet(false, true);
+    }
 
     private final ConcurrentMap<String, ReferenceInjectionMetadata> injectionMetadataCache =
             new ConcurrentHashMap<String, ReferenceInjectionMetadata>(256);

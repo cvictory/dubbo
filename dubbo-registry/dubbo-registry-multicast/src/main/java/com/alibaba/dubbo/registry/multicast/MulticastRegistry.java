@@ -91,6 +91,13 @@ public class MulticastRegistry extends FailbackRegistry {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    while (SINGLETON.get()){
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     byte[] buf = new byte[2048];
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
                     while (!mutilcastSocket.isClosed()) {
