@@ -44,9 +44,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     @Override
     public <T> T getExtension(Class<T> type, String name) {
         for (ExtensionFactory factory : factories) {
-            System.out.println("-----------"+ type +"##" + name + "##" + factory);
             T extension = factory.getExtension(type, name);
-            System.out.println("-----end------"+ type +"##" + name + "##" + factory);
             if (extension != null) {
                 return extension;
             }
