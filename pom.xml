@@ -45,7 +45,7 @@
         <url>https://github.com/cvictory/incubator-dubbo</url>
         <connection>scm:git:https://github.com/cvictory/incubator-dubbo.git</connection>
         <developerConnection>scm:git:https://github.com/cvictory/incubator-dubbo.git</developerConnection>
-      <tag>dubbo-parent-2.6.6</tag>
+        <tag>dubbo-2.6.6</tag>
   </scm>
     <mailingLists>
         <mailingList>
