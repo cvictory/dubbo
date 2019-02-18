@@ -446,8 +446,8 @@ public abstract class AbstractConfig implements Serializable {
         }
     }
 
-    boolean isAnnotationArray(Class target){
-        if(target.isArray() && target.getComponentType().isAnnotation()){
+    boolean isAnnotationArray(Class target) {
+        if (target.isArray() && target.getComponentType().isAnnotation()) {
             return true;
         }
         return false;
