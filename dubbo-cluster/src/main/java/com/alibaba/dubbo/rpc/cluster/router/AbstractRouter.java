@@ -14,39 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.config.spring.convert.converter;
+package com.alibaba.dubbo.rpc.cluster.router;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.rpc.cluster.Router;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+public abstract class AbstractRouter implements Router {
 
-/**
- * {@link StringArrayToMapConverter} Test
- */
-public class StringArrayToMapConverterTest {
+    protected URL url;
+    protected int priority;
 
-    @Test
-    public void testConvert() {
+    @Override
+    public URL getUrl() {
+        return url;
+    }
 
-        StringArrayToMapConverter converter = new StringArrayToMapConverter();
+    @Override
+    public int compareTo(Router o) {
+        return (this.getPriority() < o.getPriority()) ? -1 : ((this.getPriority() == o.getPriority()) ? 0 : 1);
+    }
 
-        Map<String, String> value = converter.convert(new String[]{"Hello", "World"});
-
-        Map<String, String> expected = new LinkedHashMap<String, String>();
-
-        expected.put("Hello", "World");
-
-        Assert.assertEquals(expected, value);
-
-        value = converter.convert(new String[]{});
-
-        Assert.assertNull(value);
-
-        value = converter.convert(null);
-
-        Assert.assertNull(value);
-
+    public int getPriority() {
+        return priority;
     }
 }

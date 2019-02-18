@@ -14,25 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.config.spring.convert.converter;
+package com.alibaba.dubbo.common.extensionloader.injection;
 
-import com.alibaba.dubbo.common.utils.CollectionUtils;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.ObjectUtils;
-
-import java.util.Map;
+import com.alibaba.dubbo.common.extension.SPI;
 
 /**
- * {@link String}[] to {@link Map} {@link Converter}
  *
- * @see CollectionUtils#toStringMap(String[])
- * @since 2.5.11
  */
-public class StringArrayToMapConverter implements Converter<String[], Map<String, String>> {
-
-    @Override
-    public Map<String, String> convert(String[] source) {
-        return ObjectUtils.isEmpty(source) ? null : CollectionUtils.toStringMap(source);
-    }
-
+@SPI("injection")
+public interface InjectExt {
+    String echo(String msg);
 }

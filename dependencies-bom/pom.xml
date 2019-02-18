@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
+<parent>
+<groupId>org.sonatype.oss</groupId>
+<artifactId>oss-parent</artifactId>
+<version>7</version>
+</parent>
 
-    <groupId>com.alibaba</groupId>
-    <artifactId>dubbo-dependencies-bom</artifactId>
-    <version>2.6.4-SNAPSHOT</version>
-    <packaging>pom</packaging>
+<groupId>com.alibaba</groupId>
+<artifactId>dubbo-dependencies-bom</artifactId>
+<version>2.6.6-SNAPSHOT</version>
+<packaging>pom</packaging>
 
-    <name>dubbo-dependencies-bom</name>
-    <description>Dubbo dependencies BOM</description>
-    <url>https://github.com/apache/incubator-dubbo</url>
-    <inceptionYear>2011</inceptionYear>
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+<name>dubbo-dependencies-bom</name>
+<description>Dubbo dependencies BOM</description>
+<url>https://github.com/apache/incubator-dubbo</url>
+<inceptionYear>2011</inceptionYear>
+<licenses>
+<license>
+    <name>Apache License, Version 2.0</name>
+    <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    <distribution>repo</distribution>
+</license>
+</licenses>
 
-    <scm>
-        <url>https://github.com/apache/incubator-dubbo</url>
-        <connection>scm:git:https://github.com/apache/incubator-dubbo.git</connection>
-        <developerConnection>scm:git:https://github.com/apache/incubator-dubbo.git</developerConnection>
-      <tag>dubbo-2.6.4</tag>
-  </scm>
+<scm>
+<url>https://github.com/apache/incubator-dubbo</url>
+<connection>scm:git:https://github.com/apache/incubator-dubbo.git</connection>
+<developerConnection>scm:git:https://github.com/apache/incubator-dubbo.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <mailingLists>
         <mailingList>
             <name>Development List</name>
@@ -75,7 +75,7 @@
         <spring_version>4.3.16.RELEASE</spring_version>
         <javassist_version>3.20.0-GA</javassist_version>
         <netty_version>3.2.5.Final</netty_version>
-        <netty4_version>4.0.35.Final</netty4_version>
+        <netty4_version>4.1.25.Final</netty4_version>
         <mina_version>1.1.7</mina_version>
         <grizzly_version>2.1.4</grizzly_version>
         <httpclient_version>4.5.3</httpclient_version>
@@ -112,6 +112,8 @@
         <jaxb_version>2.2.7</jaxb_version>
         <activation_version>1.2.0</activation_version>
         <hessian_lite_version>3.2.4</hessian_lite_version>
+        <alibaba_spring_context_support_version>1.0.2</alibaba_spring_context_support_version>
+        <yaml_version>1.17</yaml_version>
     </properties>
 
     <dependencyManagement>
@@ -358,6 +360,23 @@
                 <artifactId>hessian-lite</artifactId>
                 <version>${hessian_lite_version}</version>
             </dependency>
+
+            <!-- Alibaba extensions -->
+
+            <!-- Spring Context Support -->
+            <dependency>
+                <groupId>com.alibaba.spring</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${alibaba_spring_context_support_version}</version>
+            </dependency>
+
+            <!-- YAML -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${yaml_version}</version>
+            </dependency>
+
             <!-- Test lib -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -371,6 +390,7 @@
                 <version>${embedded_redis_version}</version>
                 <scope>test</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
