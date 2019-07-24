@@ -344,16 +344,16 @@ public class AnnotationUtils {
                 continue;
             }
 
-            /**
-             * @since 2.7.1
-             * ignore annotation member
-             */
-            if (attributeValue.getClass().isAnnotation()) {
-                continue;
-            }
-            if (attributeValue.getClass().isArray() && attributeValue.getClass().getComponentType().isAnnotation()) {
-                continue;
-            }
+//            /**
+//             * @since 2.7.1
+//             * ignore annotation member
+//             */
+//            if (attributeValue.getClass().isAnnotation()) {
+//                continue;
+//            }
+//            if (attributeValue.getClass().isArray() && attributeValue.getClass().getComponentType().isAnnotation()) {
+//                continue;
+//            }
             actualAttributes.put(attributeName, attributeValue);
         }
 
