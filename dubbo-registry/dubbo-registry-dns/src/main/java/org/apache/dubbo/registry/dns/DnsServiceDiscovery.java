@@ -25,6 +25,7 @@ import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.timer.HashedWheelTimer;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.common.utils.NamedThreadFactory;
+import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.event.EventDispatcher;
 import org.apache.dubbo.event.EventListener;
 import org.apache.dubbo.registry.client.DefaultServiceInstance;
@@ -48,6 +49,7 @@ import static org.apache.dubbo.registry.Constants.DEFAULT_REGISTRY_RECONNECT_PER
 import static org.apache.dubbo.registry.Constants.DEFAULT_SESSION_TIMEOUT;
 import static org.apache.dubbo.registry.Constants.REGISTRY_RECONNECT_PERIOD_KEY;
 import static org.apache.dubbo.registry.Constants.SESSION_TIMEOUT_KEY;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_SERVER;
 
 /**
  * 2019-11-08
@@ -64,6 +66,7 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
 
     protected String defaultDnsUrlPostfix;
     protected int defaultPort;
+    protected String dnsServer;
     EventDispatcher dispatcher;
 
     public DnsServiceDiscovery() {
@@ -72,7 +75,6 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
 
     @Override
     public void onEvent(ServiceInstancesChangedEvent event) {
-
 
     }
 
@@ -91,6 +93,7 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
         this.defaultPort = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", "dns").getInteger("port",
                 ExtensionLoader.getExtensionLoader(Protocol.class).getExtension("dubbo").getDefaultPort());
         this.dnsLookup = new DnsLookup();
+        this.dnsServer = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", "dns").getString(DNS_SERVER);
         this.dnsPollingPeriod = registryURL.getParameter(REGISTRY_RECONNECT_PERIOD_KEY, DEFAULT_REGISTRY_RECONNECT_PERIOD / 3);
         periodTimer = new HashedWheelTimer(new NamedThreadFactory("DubboDnsCycleTimer", true), dnsPollingPeriod / 5, TimeUnit.MILLISECONDS, 128);
     }
@@ -150,6 +153,9 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
 
 
     protected String getDNSURL(String serviceName) {
+        if (StringUtils.isNoneEmpty(dnsServer)) {
+            return dnsServer;
+        }
         return serviceName + this.defaultDnsUrlPostfix;
     }
 

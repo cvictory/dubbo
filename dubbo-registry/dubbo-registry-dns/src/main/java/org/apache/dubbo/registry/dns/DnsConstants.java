@@ -8,4 +8,5 @@ public class DnsConstants {
     public static final String DNS_SERVICE = "dns-service";
     public static final String DNS_NAMESPACE = "dns-ns";
     public static final String DNS_ZONE = "dns-zone";
+    public static final String DNS_SERVER = "dns-server";
 }

@@ -1,1 +1,1 @@
-k8dns=org.apache.dubbo.registry.dns.DnsServiceDiscovery
+k8s-dns=org.apache.dubbo.registry.dns.DnsServiceDiscovery
