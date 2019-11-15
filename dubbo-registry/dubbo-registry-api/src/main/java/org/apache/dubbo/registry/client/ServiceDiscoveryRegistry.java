@@ -84,7 +84,6 @@ import static org.apache.dubbo.metadata.MetadataService.toURLs;
 import static org.apache.dubbo.registry.client.ServiceDiscoveryFactory.getExtension;
 import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.getExportedServicesRevision;
 import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.getMetadataStorageType;
-import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.getProtocolPort;
 
 /**
  * Being different to the traditional registry, {@link ServiceDiscoveryRegistry} that is a new service-oriented
@@ -552,7 +551,7 @@ public class ServiceDiscoveryRegistry extends FailbackRegistry {
                     .map(templateURL -> templateURL.removeParameter(PID_KEY))
                     .map(templateURL -> {
                         String protocol = templateURL.getProtocol();
-                        int port = getProtocolPort(serviceInstance, protocol);
+                        int port = templateURL.getPort();
                         if (Objects.equals(templateURL.getHost(), host)
                                 && Objects.equals(templateURL.getPort(), port)) { // use templateURL if equals
                             return templateURL;

@@ -18,7 +18,6 @@ package org.apache.dubbo.registry.dns;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.config.CompositeConfiguration;
-import org.apache.dubbo.common.config.Environment;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
@@ -28,6 +27,8 @@ import org.apache.dubbo.common.utils.NamedThreadFactory;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.apache.dubbo.event.EventDispatcher;
 import org.apache.dubbo.event.EventListener;
+import org.apache.dubbo.metadata.MetadataService;
+import org.apache.dubbo.metadata.WritableMetadataService;
 import org.apache.dubbo.registry.client.DefaultServiceInstance;
 import org.apache.dubbo.registry.client.ServiceDiscovery;
 import org.apache.dubbo.registry.client.ServiceInstance;
@@ -42,14 +43,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_METADATA_STORAGE_TYPE;
+import static org.apache.dubbo.metadata.MetadataService.toURLs;
+import static org.apache.dubbo.metadata.WritableMetadataService.getExtension;
 import static org.apache.dubbo.registry.Constants.DEFAULT_REGISTRY_RECONNECT_PERIOD;
 import static org.apache.dubbo.registry.Constants.DEFAULT_SESSION_TIMEOUT;
 import static org.apache.dubbo.registry.Constants.REGISTRY_RECONNECT_PERIOD_KEY;
 import static org.apache.dubbo.registry.Constants.SESSION_TIMEOUT_KEY;
-import static org.apache.dubbo.registry.dns.DnsConstants.DNS_SERVER;
+import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.EXPORTED_SERVICES_REVISION_PROPERTY_NAME;
+import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.METADATA_SERVICE_URL_PARAMS_PROPERTY_NAME;
+import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.getMetadataServiceParameter;
+import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataUtils.getMetadataStorageType;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_APP_SUFFIX;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_APP_SUFFIX_DEFAULT_VALUE;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_ID;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_NAMESPACE;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_NAMESPACE_DEFAULT_VALUE;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_SERVER_SUFFIX;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_ZONE;
+import static org.apache.dubbo.registry.dns.DnsConstants.DNS_ZONE_DEFAULT_VALUE;
 
 /**
  * 2019-11-08
@@ -66,7 +82,6 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
 
     protected String defaultDnsUrlPostfix;
     protected int defaultPort;
-    protected String dnsServer;
     EventDispatcher dispatcher;
 
     public DnsServiceDiscovery() {
@@ -85,15 +100,13 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
         this.dispatcher = EventDispatcher.getDefaultExtension();
         this.dispatcher.addEventListener(this);
 
-        CompositeConfiguration compositeConfiguration = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", "dns");
-        String ns = compositeConfiguration.getString("ns", "default");
-        String zone = compositeConfiguration.getString("zone", "cluster.local");
-        this.defaultDnsUrlPostfix = "." + ns + ".svc." + zone;
+
+        this.defaultDnsUrlPostfix = getDNSURLSuffix();
         // 默认使用dubbo协议端口
         this.defaultPort = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", "dns").getInteger("port",
                 ExtensionLoader.getExtensionLoader(Protocol.class).getExtension("dubbo").getDefaultPort());
         this.dnsLookup = new DnsLookup();
-        this.dnsServer = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", "dns").getString(DNS_SERVER);
+
         this.dnsPollingPeriod = registryURL.getParameter(REGISTRY_RECONNECT_PERIOD_KEY, DEFAULT_REGISTRY_RECONNECT_PERIOD / 3);
         periodTimer = new HashedWheelTimer(new NamedThreadFactory("DubboDnsCycleTimer", true), dnsPollingPeriod / 5, TimeUnit.MILLISECONDS, 128);
     }
@@ -133,6 +146,7 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
     public List<ServiceInstance> getInstances(String serviceName) {
         try {
             List<String> list = dnsLookup.nsLookupForA(getDNSURL(serviceName));
+            System.out.println("Nslookup");
             if (CollectionUtils.isEmpty(list)) {
                 subscribeServices.remove(serviceName);
                 return Collections.EMPTY_LIST;
@@ -141,7 +155,7 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
             Collections.sort(list);
             List<ServiceInstance> serviceInstances = new ArrayList<>(list.size());
             for (String ip : list) {
-                serviceInstances.add(new DefaultServiceInstance(String.valueOf(System.nanoTime()), serviceName, ip, defaultPort));
+                serviceInstances.add(assemblyServiceInstance(serviceName, ip));
             }
             subscribeServices.put(serviceName, System.identityHashCode(serviceInstances));
             return serviceInstances;
@@ -151,12 +165,28 @@ public class DnsServiceDiscovery implements ServiceDiscovery, EventListener<Serv
         return Collections.EMPTY_LIST;
     }
 
+    protected String getDNSURLSuffix() {
+        CompositeConfiguration compositeConfiguration = ApplicationModel.getEnvironment().getConfiguration("dubbo.registry", DNS_ID);
+        String defaultUrlSuffix = compositeConfiguration.getString(DNS_SERVER_SUFFIX);
+        if (StringUtils.isNotEmpty(defaultUrlSuffix)) {
+            return defaultUrlSuffix;
+        }
+        String ns = compositeConfiguration.getString(DNS_NAMESPACE, DNS_NAMESPACE_DEFAULT_VALUE);
+        String zone = compositeConfiguration.getString(DNS_ZONE, DNS_ZONE_DEFAULT_VALUE);
+        String appSuffix = compositeConfiguration.getString(DNS_APP_SUFFIX, DNS_APP_SUFFIX_DEFAULT_VALUE);
+        return appSuffix + "." + ns + ".svc." + zone;
+    }
 
     protected String getDNSURL(String serviceName) {
-        if (StringUtils.isNoneEmpty(dnsServer)) {
-            return dnsServer;
-        }
+        System.out.println("The headless service url: " + serviceName + this.defaultDnsUrlPostfix);
         return serviceName + this.defaultDnsUrlPostfix;
+    }
+
+    private ServiceInstance assemblyServiceInstance(String serviceName, String ip) {
+        DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance(String.valueOf(System.nanoTime()), serviceName, ip, defaultPort);
+        defaultServiceInstance.getMetadata().put(METADATA_SERVICE_URL_PARAMS_PROPERTY_NAME, "{\"dubbo\":{\"version\":\"1.0.0\",\"dubbo\":\"2.0.2\",\"port\":\"20881\"}}");
+        defaultServiceInstance.getMetadata().put(EXPORTED_SERVICES_REVISION_PROPERTY_NAME, String.valueOf(System.nanoTime()));
+        return defaultServiceInstance;
     }
 
     static class DNSPollingTask extends BiPollingTimeTask<String, DnsServiceDiscovery> {

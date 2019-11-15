@@ -23,6 +23,7 @@ import org.apache.dubbo.metadata.WritableMetadataService;
 import org.apache.dubbo.registry.client.ServiceInstance;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
