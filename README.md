@@ -14,8 +14,6 @@ Apache Dubbo is a high-performance, Java based open source RPC framework. Please
 
 We are now collecting dubbo user info in order to help us to improve Dubbo better, pls. kindly help us by providing yours on [issue#1012: Wanted: who's using dubbo](https://github.com/apache/dubbo/issues/1012), thanks :)
 
-[使用文档](http://dubbo.apache.org/zh-cn/docs/user/new-features-in-a-glance.html)/[Documentation](http://dubbo.apache.org/en-us/docs/user/quick-start.html)
-
 ## Architecture
 
 ![Architecture](http://dubbo.apache.org/img/architecture.png)
@@ -44,7 +42,7 @@ There's a [README](https://github.com/apache/dubbo-samples/tree/master/java/dubb
 
 ```xml
 <properties>
-    <dubbo.version>2.7.6</dubbo.version>
+    <dubbo.version>2.7.7</dubbo.version>
 </properties>
     
 <dependencies>
@@ -67,12 +65,12 @@ There's a [README](https://github.com/apache/dubbo-samples/tree/master/java/dubb
 ```java
 package org.apache.dubbo.samples.api;
 
-public interface GreetingService {
+public interface GreetingsService {
     String sayHi(String name);
 }
 ```
 
-*See [api/GreetingService.java](https://github.com/apache/dubbo-samples/blob/master/java/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/api/GreetingsService.java) on GitHub.*
+*See [api/GreetingsService.java](https://github.com/apache/dubbo-samples/blob/master/java/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/api/GreetingsService.java) on GitHub.*
 
 ### Implement service interface for the provider
 
@@ -89,7 +87,7 @@ public class GreetingsServiceImpl implements GreetingsService {
 }
 ```
 
-*See [provider/GreetingServiceImpl.java](https://github.com/apache/dubbo-samples/blob/master/java/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java) on GitHub.*
+*See [provider/GreetingsServiceImpl.java](https://github.com/apache/dubbo-samples/blob/master/java/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java) on GitHub.*
 
 ### Start service provider
 
